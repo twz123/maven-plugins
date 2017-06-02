@@ -21,6 +21,7 @@ package org.apache.maven.plugins.dependency.fromDependencies;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.dependency.utils.DependencyStatusSets;
 import org.apache.maven.plugins.dependency.utils.DependencyUtil;
 import org.apache.maven.plugins.dependency.utils.filters.MarkerFileFilter;
@@ -80,12 +81,13 @@ public class UnpackDependenciesMojo
      * through each one passing it to DependencyUtil.unpackFile().
      *
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      * @see #getDependencySets(boolean)
      * @see #unpack(Artifact, File, String)
      */
     @Override
     protected void doExecute()
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         DependencyStatusSets dss = getDependencySets( this.failOnMissingClassifierArtifact );
 

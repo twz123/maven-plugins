@@ -143,7 +143,7 @@ public class UnpackMojo
     }
 
     protected List<ArtifactItem> getProcessedArtifactItems( boolean removeVersion )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         List<ArtifactItem> items =
             super.getProcessedArtifactItems( new ProcessArtifactItemsRequest( removeVersion, false, false, false ) );

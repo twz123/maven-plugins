@@ -22,6 +22,7 @@ package org.apache.maven.plugins.dependency.fromDependencies;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.dependency.utils.DependencyStatusSets;
 import org.apache.maven.plugins.dependency.utils.DependencyUtil;
 import org.apache.maven.plugins.dependency.utils.filters.DestFileFilter;
@@ -108,12 +109,13 @@ public class CopyDependenciesMojo
      * calling copyArtifact.
      *
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      * @see #getDependencySets(boolean, boolean)
      * @see #copyArtifact(Artifact, boolean, boolean, boolean, boolean)
      */
     @Override
     protected void doExecute()
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         DependencyStatusSets dss = getDependencySets( this.failOnMissingClassifierArtifact, addParentPoms );
         Set<Artifact> artifacts = dss.getResolvedDependencies();
@@ -157,8 +159,10 @@ public class CopyDependenciesMojo
      * 
      * @param artifact
      * @param targetRepository
+     * @throws MojoFailureException
      */
     private void installArtifact( Artifact artifact, ProjectBuildingRequest buildingRequest )
+        throws MojoFailureException
     {
         try
         {
@@ -253,9 +257,11 @@ public class CopyDependenciesMojo
     
     /**
      * Copy the pom files associated with the artifacts.
+     * 
+     * @throws MojoFailureException
      */
     public void copyPoms( File destDir, Set<Artifact> artifacts, boolean removeVersion )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
 
     {
         copyPoms( destDir, artifacts, removeVersion, false );
@@ -263,9 +269,11 @@ public class CopyDependenciesMojo
     
     /**
      * Copy the pom files associated with the artifacts.
+     * 
+     * @throws MojoFailureException
      */
     public void copyPoms( File destDir, Set<Artifact> artifacts, boolean removeVersion, boolean removeClassifier )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
 
     {
         for ( Artifact artifact : artifacts )
@@ -287,6 +295,7 @@ public class CopyDependenciesMojo
     }
 
     protected Artifact getResolvedPomArtifact( Artifact artifact )
+        throws MojoFailureException
     {
         DefaultArtifactCoordinate coordinate = new DefaultArtifactCoordinate();
         coordinate.setGroupId( artifact.getGroupId() );

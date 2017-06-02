@@ -131,10 +131,11 @@ public abstract class AbstractFromConfigurationMojo
      * @param processArtifactItemsRequest preprocessing instructions
      * @return An ArrayList of preprocessed ArtifactItems
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      * @see ArtifactItem
      */
     protected List<ArtifactItem> getProcessedArtifactItems( ProcessArtifactItemsRequest processArtifactItemsRequest  )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
 
         boolean removeVersion = processArtifactItemsRequest.isRemoveVersion(), prependGroupId =
@@ -199,9 +200,10 @@ public abstract class AbstractFromConfigurationMojo
      * @param artifactItem containing information about artifact from plugin configuration.
      * @return Artifact object representing the specified file.
      * @throws MojoExecutionException with a message if the version can't be found in DependencyManagement.
+     * @throws MojoFailureException
      */
     protected Artifact getArtifact( ArtifactItem artifactItem )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         Artifact artifact;
 

@@ -25,7 +25,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -33,6 +32,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.dependency.utils.DependencySilentLog;
+import org.apache.maven.plugins.dependency.utils.repository.RepositoryResolver;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -60,6 +60,9 @@ public abstract class AbstractDependencyMojo
     @Component
     private ArchiverManager archiverManager;
 
+    @Component
+    private RepositoryResolver repositoryResolver;
+
     /**
      * <p>
      * will use the jvm chmod, this is available for user and all level group level will be ignored
@@ -82,12 +85,6 @@ public abstract class AbstractDependencyMojo
      */
     @Parameter( defaultValue = "${project}", readonly = true, required = true )
     private MavenProject project;
-    
-    /**
-     * Remote repositories which will be searched for artifacts.
-     */
-    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true, required = true )
-    private List<ArtifactRepository> remoteRepositories;
 
     /**
      * Contains the full list of projects in the reactor.
@@ -317,13 +314,15 @@ public abstract class AbstractDependencyMojo
     /**
      * @return Returns a new ProjectBuildingRequest populated from the current session and the current project remote
      *         repositories, used to resolve artifacts.
+     * @throws MojoFailureException
      */
     public ProjectBuildingRequest newResolveArtifactProjectBuildingRequest()
+        throws MojoFailureException
     {
         ProjectBuildingRequest buildingRequest =
             new DefaultProjectBuildingRequest( session.getProjectBuildingRequest() );
 
-        buildingRequest.setRemoteRepositories( remoteRepositories );
+        buildingRequest.setRemoteRepositories( repositoryResolver.resolveRepositories() );
 
         return buildingRequest;
     }

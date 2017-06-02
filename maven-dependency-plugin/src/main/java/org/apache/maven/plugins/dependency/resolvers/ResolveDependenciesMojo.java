@@ -20,6 +20,7 @@ package org.apache.maven.plugins.dependency.resolvers;
  */
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.dependency.utils.DependencyStatusSets;
 import org.apache.maven.plugins.dependency.utils.DependencyUtil;
 import org.apache.maven.plugins.dependency.utils.filters.ResolveFileFilter;
@@ -79,10 +80,11 @@ public class ResolveDependenciesMojo
      * Main entry into mojo. Gets the list of dependencies and iterates through displaying the resolved version.
      *
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      */
     @Override
     protected void doExecute()
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         // get sets of dependencies
         results = this.getDependencySets( false, includeParents );

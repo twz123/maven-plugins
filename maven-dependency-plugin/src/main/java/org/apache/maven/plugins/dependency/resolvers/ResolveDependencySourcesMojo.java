@@ -21,6 +21,7 @@ package org.apache.maven.plugins.dependency.resolvers;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
@@ -45,10 +46,11 @@ public class ResolveDependencySourcesMojo
      * resolving the source jars.
      *
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      */
     @Override
     protected void doExecute()
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         if ( StringUtils.isEmpty( this.classifier ) )
         {

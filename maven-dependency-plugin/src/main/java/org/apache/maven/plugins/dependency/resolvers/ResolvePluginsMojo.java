@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -63,10 +64,11 @@ public class ResolvePluginsMojo
      * displaying the resolved version.
      *
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      */
     @Override
     protected void doExecute()
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         try
         {

@@ -19,19 +19,8 @@ package org.apache.maven.plugins.dependency;
  * under the License.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.MavenArtifactRepository;
-import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -39,6 +28,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.dependency.utils.repository.RepositoryResolver;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.shared.artifact.ArtifactCoordinate;
@@ -60,8 +50,6 @@ import org.codehaus.plexus.util.StringUtils;
 public class GetMojo
     extends AbstractMojo
 {
-    private static final Pattern ALT_REPO_SYNTAX_PATTERN = Pattern.compile( "(.+)::(.*)::(.+)" );
-    
     @Parameter( defaultValue = "${session}", required = true, readonly = true )
     private MavenSession session;
     
@@ -80,11 +68,8 @@ public class GetMojo
    @Component
    private ArtifactHandlerManager artifactHandlerManager;
 
-    /**
-     * Map that contains the layouts.
-     */
-    @Component( role = ArtifactRepositoryLayout.class )
-    private Map<String, ArtifactRepositoryLayout> repositoryLayouts;
+    @Component
+    private RepositoryResolver repositoryResolver;
 
     private DefaultDependableCoordinate coordinate = new DefaultDependableCoordinate();
     
@@ -121,23 +106,10 @@ public class GetMojo
     private String packaging = "jar";
 
     /**
-     * Repositories in the format id::[layout]::url or just url, separated by comma.
-     * ie. central::default::http://repo1.maven.apache.org/maven2,myrepo::::http://repo.acme.com,http://repo.acme2.com
-     */
-    @Parameter( property = "remoteRepositories" )
-    private String remoteRepositories;
-
-    /**
      * A string of the form groupId:artifactId:version[:packaging[:classifier]].
      */
     @Parameter( property = "artifact" )
     private String artifact;
-
-    /**
-     *
-     */
-    @Parameter( defaultValue = "${project.remoteArtifactRepositories}", readonly = true, required = true )
-    private List<ArtifactRepository> pomRemoteRepositories;
 
     /**
      * Download transitively, retrieving the specified artifact and all of its dependencies.
@@ -190,33 +162,12 @@ public class GetMojo
             }
         }
 
-        ArtifactRepositoryPolicy always =
-            new ArtifactRepositoryPolicy( true, ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS,
-                                          ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN );
-
-        List<ArtifactRepository> repoList = new ArrayList<ArtifactRepository>();
-
-        if ( pomRemoteRepositories != null )
-        {
-            repoList.addAll( pomRemoteRepositories );
-        }
-
-        if ( remoteRepositories != null )
-        {
-            // Use the same format as in the deploy plugin id::layout::url
-            List<String> repos = Arrays.asList( StringUtils.split( remoteRepositories, "," ) );
-            for ( String repo : repos )
-            {
-                repoList.add( parseRepository( repo, always ) );
-            }
-        }
-
         try
         {
             ProjectBuildingRequest buildingRequest =
                 new DefaultProjectBuildingRequest( session.getProjectBuildingRequest() );
-            
-            buildingRequest.setRemoteRepositories( repoList );
+
+            buildingRequest.setRemoteRepositories( repositoryResolver.resolveRepositories() );
 
             if ( transitive )
             {
@@ -249,47 +200,6 @@ public class GetMojo
         artifactCoordinate.setClassifier( dependableCoordinate.getClassifier() );
         artifactCoordinate.setExtension( artifactHandler.getExtension() );
         return artifactCoordinate;
-    }
-
-    ArtifactRepository parseRepository( String repo, ArtifactRepositoryPolicy policy )
-        throws MojoFailureException
-    {
-        // if it's a simple url
-        String id = "temp";
-        ArtifactRepositoryLayout layout = getLayout( "default" );
-        String url = repo;
-
-        // if it's an extended repo URL of the form id::layout::url
-        if ( repo.contains( "::" ) )
-        {
-            Matcher matcher = ALT_REPO_SYNTAX_PATTERN.matcher( repo );
-            if ( !matcher.matches() )
-            {
-                throw new MojoFailureException( repo, "Invalid syntax for repository: " + repo,
-                                                "Invalid syntax for repository. Use \"id::layout::url\" or \"URL\"." );
-            }
-
-            id = matcher.group( 1 ).trim();
-            if ( !StringUtils.isEmpty( matcher.group( 2 ) ) )
-            {
-                layout = getLayout( matcher.group( 2 ).trim() );
-            }
-            url = matcher.group( 3 ).trim();
-        }
-        return new MavenArtifactRepository( id, url, layout, policy, policy );
-    }
-
-    private ArtifactRepositoryLayout getLayout( String id )
-        throws MojoFailureException
-    {
-        ArtifactRepositoryLayout layout = repositoryLayouts.get( id );
-
-        if ( layout == null )
-        {
-            throw new MojoFailureException( id, "Invalid repository layout", "Invalid repository layout: " + id );
-        }
-
-        return layout;
     }
 
     protected boolean isSkip()

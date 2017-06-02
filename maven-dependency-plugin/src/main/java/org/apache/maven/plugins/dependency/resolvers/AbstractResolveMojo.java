@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.dependency.fromDependencies.AbstractDependencyFilterMojo;
 import org.apache.maven.plugins.dependency.utils.DependencyUtil;
@@ -150,9 +151,10 @@ public abstract class AbstractResolveMojo
      * @param artifact the artifact used to retrieve dependencies
      * @return resolved set of dependencies
      * @throws DependencyResolverException
+     * @throws MojoFailureException
      */
     protected Set<Artifact> resolveArtifactDependencies( final DependableCoordinate artifact )
-        throws DependencyResolverException
+        throws DependencyResolverException, MojoFailureException
     {
         ProjectBuildingRequest buildingRequest = newResolveArtifactProjectBuildingRequest();
 

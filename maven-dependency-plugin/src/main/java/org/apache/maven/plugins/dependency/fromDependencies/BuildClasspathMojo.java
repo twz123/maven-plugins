@@ -21,6 +21,7 @@ package org.apache.maven.plugins.dependency.fromDependencies;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.dependency.utils.DependencyUtil;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -166,11 +167,12 @@ public class BuildClasspathMojo
      * Main entry into mojo. Gets the list of dependencies and iterates to create a classpath.
      *
      * @throws MojoExecutionException with a message if an error occurs.
+     * @throws MojoFailureException
      * @see #getResolvedDependencies(boolean)
      */
     @Override
     protected void doExecute()
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         // initialize the separators.
         boolean isFileSepSet = StringUtils.isNotEmpty( fileSeparator );

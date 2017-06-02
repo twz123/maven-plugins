@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.dependency.AbstractDependencyMojo;
@@ -255,9 +256,10 @@ public abstract class AbstractDependencyFilterMojo
      *
      * @return A set of artifacts
      * @throws MojoExecutionException
+     * @throws MojoFailureException
      */
     protected Set<Artifact> getResolvedDependencies( boolean stopOnFailure )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
 
     {
         DependencyStatusSets status = getDependencySets( stopOnFailure );
@@ -266,7 +268,7 @@ public abstract class AbstractDependencyFilterMojo
     }
 
     protected DependencyStatusSets getDependencySets( boolean stopOnFailure )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         return getDependencySets( stopOnFailure, false );
     }
@@ -280,9 +282,10 @@ public abstract class AbstractDependencyFilterMojo
      * @return DependencyStatusSets - Bean of TreeSets that contains information
      *         on the projects dependencies
      * @throws MojoExecutionException
+     * @throws MojoFailureException
      */
     protected DependencyStatusSets getDependencySets( boolean stopOnFailure, boolean includeParents )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         // add filters in well known order, least specific to most specific
         FilterArtifacts filter = new FilterArtifacts();
@@ -358,7 +361,7 @@ public abstract class AbstractDependencyFilterMojo
     }
 
     private void addParentArtifacts( MavenProject project, Set<Artifact> artifacts )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         while ( project.hasParent() )
         {
@@ -392,9 +395,10 @@ public abstract class AbstractDependencyFilterMojo
      * @return DependencyStatusSets - Bean of TreeSets that contains information
      *         on the projects dependencies
      * @throws MojoExecutionException
+     * @throws MojoFailureException
      */
     protected DependencyStatusSets getClassifierTranslatedDependencies( Set<Artifact> artifacts, boolean stopOnFailure )
-        throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         Set<Artifact> unResolvedArtifacts = new LinkedHashSet<Artifact>();
         Set<Artifact> resolvedArtifacts = artifacts;
@@ -464,7 +468,7 @@ public abstract class AbstractDependencyFilterMojo
 
 
     protected Set<Artifact> resolve( Set<ArtifactCoordinate> coordinates, boolean stopOnFailure )
-                    throws MojoExecutionException
+        throws MojoExecutionException, MojoFailureException
     {
         ProjectBuildingRequest buildingRequest = newResolveArtifactProjectBuildingRequest();
 
