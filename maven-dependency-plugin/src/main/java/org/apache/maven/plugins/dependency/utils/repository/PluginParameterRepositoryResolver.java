@@ -50,7 +50,7 @@ import org.codehaus.plexus.util.StringUtils;
  * Example: <br/>
  * {@code central::default::http://repo1.maven.apache.org/maven2,myrepo::::http://repo.acme.com,http://repo.acme2.com}
  */
-public class PluginParameterRepositoryResolver
+final class PluginParameterRepositoryResolver
     implements RepositoryResolver
 {
     private static final String REMOTE_REPOSITORIES_PARAM_NAME = "${remoteRepositories}";

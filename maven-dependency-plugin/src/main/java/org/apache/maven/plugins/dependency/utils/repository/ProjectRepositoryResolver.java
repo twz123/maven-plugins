@@ -20,46 +20,45 @@ package org.apache.maven.plugins.dependency.utils.repository;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
+
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoFailureException;
-import org.codehaus.plexus.logging.Logger;
 
 /**
- * Default {@code RepositoryResolver} implementation that combines the project's repositories and those specified via
- * the <code>${remoteRepositories}</code> plugin parameter.
+ * Resolves repositories from the project that's currently being built.
  */
-public class DependencyRepositoryResolver
+final class ProjectRepositoryResolver
     implements RepositoryResolver
 {
-    private final Logger logger;
-
-    private final List<RepositoryResolver> resolvers;
+    private List<ArtifactRepository> remoteRepositories;
 
     @Inject
-    public DependencyRepositoryResolver( Logger logger, ProjectRepositoryResolver projectRepositoryResolver,
-                                         PluginParameterRepositoryResolver pluginParamRepositoryResolver )
+    public ProjectRepositoryResolver( MavenSession session )
     {
-        this.logger = logger;
-        resolvers = Arrays.asList( projectRepositoryResolver, pluginParamRepositoryResolver );
+        remoteRepositories = getRemoteArtifactRepositories( session );
     }
 
     @Override
     public List<ArtifactRepository> resolveRepositories()
         throws MojoFailureException
     {
-        List<ArtifactRepository> resolvedRepositories = new ArrayList<ArtifactRepository>();
+        return remoteRepositories;
+    }
 
-        for ( RepositoryResolver resolver : resolvers )
+    private static List<ArtifactRepository> getRemoteArtifactRepositories( MavenSession session )
+    {
+        List<ArtifactRepository> repositories = session.getCurrentProject().getRemoteArtifactRepositories();
+
+        if ( repositories == null || repositories.isEmpty() )
         {
-            final List<ArtifactRepository> resolved = resolver.resolveRepositories();
-            logger.info( resolver.getClass().getSimpleName() + " resolved " + resolved );
-            resolvedRepositories.addAll( resolved );
+            return Collections.emptyList();
         }
 
-        return resolvedRepositories;
+        return Collections.unmodifiableList( new ArrayList<ArtifactRepository>( repositories ) );
     }
 }

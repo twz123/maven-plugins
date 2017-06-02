@@ -99,14 +99,7 @@ under the License.
     <!-- RepositoryResolver -->
     <component>
       <role>org.apache.maven.plugins.dependency.utils.repository.RepositoryResolver</role>
-      <role-hint>default</role-hint>
       <implementation>org.apache.maven.plugins.dependency.utils.repository.DependencyRepositoryResolver</implementation>
-      <instantiation-strategy>per-lookup</instantiation-strategy>
-    </component>
-    <component>
-      <role>org.apache.maven.plugins.dependency.utils.repository.RepositoryResolver</role>
-      <role-hint>plugin-parameter</role-hint>
-      <implementation>org.apache.maven.plugins.dependency.utils.repository.PluginParameterRepositoryResolver</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
     </component>
 
